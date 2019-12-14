@@ -16,20 +16,23 @@ const getGithubUserAccessToken = code => {
     },
     body: JSON.stringify(data),
   }
-  return fetch(options.url, options).then(async response => {
-    console.log('data', response)
-    const result = await response.json()
-    console.log('result', result)
-  })
+  return fetch(options.url, options)
+    .then(async response => {
+      const result = await response.json()
+      return result
+    })
+    .catch(err => console.log('err', err))
 }
 
 export default async (req, res) => {
   const { body, method } = req
 
   switch (method) {
-    case 'POST':
-      getGithubUserAccessToken(body.code)
-      res.status(200).end('authenticated')
+    case 'POST': {
+      const { code } = JSON.parse(body)
+      const result = await getGithubUserAccessToken(code)
+      res.status(200).end(JSON.stringify(result))
+    }
 
     default:
       res.status(405).end(`Method ${method} Not Allowed`)
